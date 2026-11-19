@@ -93,11 +93,33 @@ LEGEND_STYLE = (
 )
 
 
+MAP_CSS = """
+<style>
+.leaflet-control-attribution { font-size: 10px !important; line-height: 1.3; max-width: 60%; white-space: normal; }
+details.map-legend > summary { cursor: pointer; font-weight: 600; list-style: revert; }
+@media (max-width: 600px) {
+  details.map-legend { font-size: 10.5px !important; max-width: 62% !important; max-height: 45%;
+                       overflow-y: auto; bottom: 28px !important; left: 8px !important; padding: 8px !important; }
+}
+</style>
+"""
+
+
 def _base_map(location, zoom_start) -> folium.Map:
-    m = folium.Map(location=location, zoom_start=zoom_start, tiles='OpenStreetMap')
-    folium.TileLayer('Esri.WorldGrayCanvas', name='Light Gray Canvas (Clean View)').add_to(m)
-    folium.TileLayer('Esri.WorldStreetMap', name='Esri Street Map').add_to(m)
+    """Map with the light grey canvas as the default base layer and two alternatives."""
+    m = folium.Map(location=location, zoom_start=zoom_start, tiles=None)
+    folium.TileLayer('Esri.WorldGrayCanvas', name='Light grey (default)').add_to(m)
+    folium.TileLayer('OpenStreetMap', name='OpenStreetMap', show=False).add_to(m)
+    folium.TileLayer('Esri.WorldStreetMap', name='Esri street map', show=False).add_to(m)
+    m.get_root().header.add_child(folium.Element(MAP_CSS))
     return m
+
+
+def _legend(summary: str, body: str) -> folium.Element:
+    """Collapsible legend panel; open by default, smaller and scrollable on narrow screens."""
+    return folium.Element(
+        f"<details open class='map-legend' style='{LEGEND_STYLE}'><summary>{summary}</summary>{body}</details>"
+    )
 
 
 def wbr_country_totals(df_monthly: pd.DataFrame, route: str = ROUTE_CODE) -> dict:
@@ -184,9 +206,7 @@ def build_wbr_map(df_monthly: pd.DataFrame, forecast: pd.Series | None = None,
     else:
         forecast_line = ''
 
-    legend = "".join([
-        f"<div style='{LEGEND_STYLE}'>",
-        "<b>Western Balkan Route (WBR)</b><br>",
+    legend_body = "".join([
         f"Total recorded ({period}): <b>{t['total_all']:,}</b><br>",
         f"Last 12 months recorded: <b>{t['total_12m']:,}</b><br>",
         forecast_line,
@@ -202,10 +222,9 @@ def build_wbr_map(df_monthly: pd.DataFrame, forecast: pd.Series | None = None,
         "<span style='color:#1f4e78;'>●</span> Other WBR countries<br>",
         "<i style='color:#666; font-size:10.5px;'>Corridors are illustrative, not tracked journeys. "
         "Arrivals are recorded events, not unique people.</i>",
-        "</div>",
     ])
-    m.get_root().html.add_child(folium.Element(legend))
-    folium.LayerControl(collapsed=False).add_to(m)
+    m.get_root().html.add_child(_legend('Western Balkan Route (WBR)', legend_body))
+    folium.LayerControl(collapsed=True).add_to(m)
     return m
 
 
@@ -266,9 +285,7 @@ def build_montenegro_map(mne_monthly: pd.Series, forecast: pd.Series | None = No
         forecast_line = (f"{len(forecast)}-month forecast ({forecast.index.min():%b %Y}–"
                          f"{forecast.index.max():%b %Y}): <b>{int(round(forecast.sum())):,}</b><br>")
 
-    legend = (
-        f"<div style='{LEGEND_STYLE}'>"
-        "<b style='font-size:13px; color:#b30000;'>Montenegro — last 12 months</b><br>"
+    legend_body = (
         f"Period: <b>{window}</b><br>"
         f"Total recorded arrivals: <b>{total_12m:,}</b><br>"
         f"Peak month: <b>{last_12.idxmax():%b %Y} ({int(last_12.max()):,})</b><br>"
@@ -280,8 +297,7 @@ def build_montenegro_map(mne_monthly: pd.Series, forecast: pd.Series | None = No
         "<span style='color:#e67e22; font-weight:bold;'>━━</span> Western exit (Sukobin → Ilino Brdo)<br>"
         "<span style='color:#9b59b6; font-weight:bold;'>━━</span> Coastal exit (Sukobin → Debeli Brijeg)<br>"
         "<i style='color:#666; font-size:10.5px;'>Corridors are illustrative. Hover a point for details; click for the monthly table.</i>"
-        "</div>"
     )
-    m.get_root().html.add_child(folium.Element(legend))
-    folium.LayerControl().add_to(m)
+    m.get_root().html.add_child(_legend("<span style='color:#b30000;'>Montenegro — last 12 months</span>", legend_body))
+    folium.LayerControl(collapsed=True).add_to(m)
     return m

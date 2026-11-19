@@ -65,3 +65,15 @@ def test_forecast_page_every_combination():
                 assert not at.exception, (target, i, horizon, at.exception)
                 table = at.dataframe[0].value
                 assert len(table) == horizon, (target, i, horizon)
+
+
+def test_map_page_both_views():
+    at = AppTest.from_file('../app.py', default_timeout=120)
+    at.switch_page('pages/3_Map.py').run()
+    assert not at.exception, at.exception
+    assert len(at.dataframe[0].value) == 6  # WBR arrival countries in the sheet
+    at.radio[0].set_value('Montenegro detail').run()
+    assert not at.exception, at.exception
+    assert len(at.dataframe[0].value) == 12  # last 12 months
+    at.toggle[0].set_value(False).run()
+    assert not at.exception, at.exception
