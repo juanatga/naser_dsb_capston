@@ -16,6 +16,15 @@ INK = '#0b0b0b'
 INK_2 = '#52514e'
 GRID = '#e6e5e1'
 
+# Fixed colour per model, used in every chart: colour follows the entity, never its rank.
+MODEL_COLORS = {
+    'Linear Regression': SERIES[0],
+    'Ridge Regression': SERIES[1],
+    'Random Forest': SERIES[2],
+    'Seasonal Naive': SERIES[3],
+}
+HISTORY = INK_2
+
 FONT = dict(family='-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', size=13, color=INK_2)
 
 

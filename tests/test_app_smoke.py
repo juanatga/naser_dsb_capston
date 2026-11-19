@@ -37,3 +37,31 @@ def test_explore_page_totals_and_controls():
             assert not at.exception, (i, j, at.exception)
     at.checkbox[0].check().run()
     assert not at.exception, at.exception
+
+
+def test_forecast_page_defaults_match_notebooks():
+    at = AppTest.from_file('../app.py', default_timeout=120)
+    at.switch_page('pages/2_Forecasts.py').run()
+    assert not at.exception, at.exception
+    # Montenegro default: Linear Regression, 12 months, Apr 2026 = 478
+    assert at.selectbox[0].value.startswith('Linear Regression')
+    assert at.metric[0].value == '478'
+    at.radio[0].set_value('WBR').run()
+    assert not at.exception, at.exception
+    assert at.selectbox[0].value.startswith('Random Forest')
+    assert at.metric[0].value == '3,591'
+
+
+def test_forecast_page_every_combination():
+    at = AppTest.from_file('../app.py', default_timeout=120)
+    at.switch_page('pages/2_Forecasts.py').run()
+    for target in ['WBR', 'MNE']:
+        at.radio[0].set_value(target).run()
+        for i in range(3):
+            at.selectbox[0].select_index(i).run()
+            for horizon in [3, 6, 12]:
+                at.session_state['horizon'] = horizon
+                at.run()
+                assert not at.exception, (target, i, horizon, at.exception)
+                table = at.dataframe[0].value
+                assert len(table) == horizon, (target, i, horizon)

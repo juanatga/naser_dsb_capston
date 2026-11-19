@@ -59,3 +59,17 @@ def source_footer() -> None:
         f'Data: [{SOURCE_NAME}]({SOURCE_URL}). Data runs to March 2026. '
         'DSB capstone project — exploratory analysis, not an operational planning tool.'
     )
+
+
+@st.cache_data(show_spinner='Training and evaluating models…')
+def get_evaluation(key: str):
+    """Model comparison for a target (fits 3 models + CV; about a second, then cached)."""
+    from src import modeling
+    return modeling.evaluate_models(get_target(key))
+
+
+@st.cache_data(show_spinner='Fitting the forecast…')
+def get_forecast(key: str, model_name: str) -> pd.Series:
+    """12-month recursive forecast; shorter horizons are prefixes of this path."""
+    from src import modeling
+    return modeling.run_forecast(get_target(key), model_name, modeling.MAX_HORIZON)
