@@ -19,6 +19,17 @@ def get_datasets() -> dict[str, pd.DataFrame]:
 
 
 @st.cache_data
+def get_country_names() -> dict[str, str]:
+    return data.country_names()
+
+
+def country_label(iso: str) -> str:
+    """'Montenegro (MNE)' style label; falls back to the code if unknown."""
+    name = get_country_names().get(iso)
+    return f'{name} ({iso})' if name and name != iso else iso
+
+
+@st.cache_data
 def get_target(key: str) -> pd.Series:
     return data.load_target(key, get_datasets())
 

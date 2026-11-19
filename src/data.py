@@ -97,6 +97,19 @@ def validate_monthly(series: pd.Series, name: str = 'Series', min_obs: int = MIN
     return series
 
 
+ISO3_SHEET = 'ISO3'
+NAME_OVERRIDES = {'OOO': 'Other / unspecified', 'XKX': 'Kosovo*'}
+
+
+def country_names(path: str | Path | None = None) -> dict[str, str]:
+    """ISO3 code -> country name, from the workbook's own ``ISO3`` lookup sheet."""
+    path = Path(path) if path is not None else DEFAULT_WORKBOOK
+    lookup = pd.read_excel(path, sheet_name=ISO3_SHEET).dropna()
+    names = dict(zip(lookup['ISO3'].astype(str).str.strip(), lookup['Country or Area'].astype(str).str.strip()))
+    names.update(NAME_OVERRIDES)
+    return names
+
+
 def load_target(key: str, datasets: dict[str, pd.DataFrame] | None = None,
                 path: str | Path | None = None) -> pd.Series:
     """Return the validated monthly series for a target key in ``TARGETS``."""
