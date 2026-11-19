@@ -1,0 +1,50 @@
+"""Streamlit-side helpers shared by all pages: cached data access and common notices.
+
+Caching lives here, not in ``src/``, so the modeling code stays framework-free.
+"""
+from __future__ import annotations
+
+import pandas as pd
+import streamlit as st
+
+from src import data
+
+SOURCE_NAME = 'IOM Displacement Tracking Matrix (DTM) — Europe, Q1 2026 dataset'
+SOURCE_URL = 'https://dtm.iom.int/europe'
+
+
+@st.cache_data(show_spinner='Loading the DTM workbook…')
+def get_datasets() -> dict[str, pd.DataFrame]:
+    return data.load_workbook()
+
+
+@st.cache_data
+def get_target(key: str) -> pd.Series:
+    return data.load_target(key, get_datasets())
+
+
+def datasets_or_stop() -> dict[str, pd.DataFrame]:
+    """Load the workbook, or show a readable error and stop the page."""
+    try:
+        return get_datasets()
+    except FileNotFoundError as exc:
+        st.error(
+            f'The data workbook could not be found.\n\n`{exc}`\n\n'
+            'Place `DTM Europe_Q1_2026_Dataset.xlsx` in `data/raw/` and reload.'
+        )
+        st.stop()
+
+
+def arrivals_note() -> None:
+    st.caption(
+        '“Arrivals” are recorded arrival events, not unique people: the same person can be '
+        'recorded in more than one country. Migrant presence is a separate measure.'
+    )
+
+
+def source_footer() -> None:
+    st.divider()
+    st.caption(
+        f'Data: [{SOURCE_NAME}]({SOURCE_URL}). Data runs to March 2026. '
+        'DSB capstone project — exploratory analysis, not an operational planning tool.'
+    )
