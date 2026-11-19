@@ -23,7 +23,8 @@ for col, (key, s) in zip(cols, series.items()):
         a.metric('Recorded arrivals', f'{int(s.sum()):,}')
         b.metric('Monthly observations', len(s))
         a.metric('Last 12 months', f'{int(s.tail(12).sum()):,}')
-        b.metric('Period', f'{s.index.min():%b %Y} – {s.index.max():%b %Y}')
+        b.metric('Period', f'{s.index.min():%Y}–{s.index.max():%Y}',
+                 help=f'{s.index.min():%B %Y} – {s.index.max():%B %Y}')
 
 arrivals_note()
 

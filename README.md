@@ -29,8 +29,8 @@ Here, “arrivals” means recorded arrival events, not necessarily unique peopl
 | Notebook | Contents |
 | --- | --- |
 | `01_EDA_Final.ipynb` | Data loading, quality checks, route trends, Montenegro analysis and CSV exports |
-| `02_Modeling (1).ipynb` | Model comparison and recursive forecasting for the overall WBR series; includes an interactive map |
-| `02_1_Modeling_Montenegro_Only (1).ipynb` | Dedicated model comparison and forecasts for Montenegro |
+| `02_Modeling_Finall_.ipynb` | Model comparison and recursive forecasting for the overall WBR series; includes an interactive map |
+| `02_1_Modeling_Montenegro_Only_Finall.ipynb` | Dedicated model comparison and forecasts for Montenegro |
 
 Each modeling notebook loads the Excel workbook directly. It does not depend on the CSV exports from the EDA notebook.
 
@@ -87,6 +87,53 @@ pip install pandas numpy matplotlib seaborn scikit-learn openpyxl folium
 The EDA export cell writes five prepared sheet CSVs and two monthly-series CSVs to `data/processed/`. The regional notebook saves `wbr_full_route_map.html`.
 
 **Known issue:** the final map cell in the Montenegro notebook references `folium`, `AntPath`, `locations`, `corridors` and `country_totals` without defining them in that notebook. Skip that cell to run the forecasting analysis independently, or add the map setup from the regional notebook. The map corridors are illustrative paths defined in code, not tracked individual journeys.
+
+## Interactive app
+
+The analysis is also available as a Streamlit app with four pages:
+
+| Page | Contents |
+| --- | --- |
+| Overview | Project question, headline figures for WBR and Montenegro, method and limitations |
+| Explore data | Monthly series by country, seasonality, first-arrival routes, countries of origin, migrant presence, data quality |
+| Forecasts | Choose WBR or Montenegro, a model and a 3/6/12-month horizon; compare models on the test year; download forecasts as CSV |
+| Route map | Regional WBR map and Montenegro detail map with corridors, border crossing points and recorded totals |
+
+### Run it locally
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+The app reads `data/raw/DTM Europe_Q1_2026_Dataset.xlsx` from the repository, so no upload or path change is needed. It was tested with Python 3.13.
+
+### Tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+`tests/test_parity.py` checks that the app's code reproduces the notebook results: the metrics table above, the selected models, and the saved 12-month forecasts. `tests/test_app_smoke.py` runs every page and every forecast control combination.
+
+### Code layout
+
+| Path | Purpose |
+| --- | --- |
+| `app.py` | Entrypoint: page config and navigation |
+| `pages/` | One script per page |
+| `src/data.py` | Workbook loading, monthly series, validation, EDA helpers |
+| `src/modeling.py` | Features, models, evaluation and recursive forecasting, taken from the notebooks unchanged |
+| `src/maps.py` | Folium map builders |
+| `app_common.py`, `app_charts.py` | Cached data access and shared chart styling for the app |
+| `.streamlit/config.toml` | Theme and visitor settings |
+
+The modeling code in `src/` matches the notebooks, so the app's numbers are the notebook numbers. The app adds no new modeling.
+
+**Known issue:** on the first request after the server starts, opening a page by direct link (for example `/forecasts`) shows a "Page not found" notice once, but the requested page still loads. This is a Streamlit limitation of `st.navigation`, which only learns its page list after the first run.
 
 ## Limitations and next steps
 

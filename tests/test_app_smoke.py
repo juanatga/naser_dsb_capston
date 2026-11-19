@@ -77,3 +77,17 @@ def test_map_page_both_views():
     assert len(at.dataframe[0].value) == 12  # last 12 months
     at.toggle[0].set_value(False).run()
     assert not at.exception, at.exception
+
+
+@pytest.mark.parametrize('page', PAGES)
+def test_missing_workbook_shows_friendly_error(page, monkeypatch, tmp_path):
+    import streamlit as st
+    from src import data
+    monkeypatch.setattr(data, 'DEFAULT_WORKBOOK', tmp_path / 'missing.xlsx')
+    st.cache_data.clear()
+    try:
+        at = AppTest.from_file(page, default_timeout=60).run()
+        assert not at.exception, at.exception
+        assert at.error and 'could not be found' in at.error[0].value
+    finally:
+        st.cache_data.clear()
