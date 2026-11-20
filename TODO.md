@@ -2,10 +2,10 @@
 
 Checklist for publishing the Streamlit app on Streamlit Community Cloud. Steps 1–6 (shared code, app pages, tests, configuration) are done on the `streamlit-app` branch.
 
-- [ ] **Fork the repository.** Fork `naserhusovic-droid/dsb_capston` on GitHub to your own account. Keep the fork **public**: Community Cloud deploys public repositories without extra access setup.
-- [ ] **Connect this checkout to the fork.** This folder's `origin` points to Naser's repository. Add the fork as a second remote and push the `streamlit-app` branch to it, or merge it into the fork's `main` first:
+- [x] **Fork the repository.** Done: [juanatga/naser_dsb_capston](https://github.com/juanatga/naser_dsb_capston) (public).
+- [x] **Connect this checkout to the fork.** Done: remote `fork` added and `streamlit-app` pushed. This folder's `origin` points to Naser's repository. Add the fork as a second remote and push the `streamlit-app` branch to it, or merge it into the fork's `main` first:
   ```bash
-  git remote add fork git@github.com:<your-username>/dsb_capston.git
+  git remote add fork git@github.com:juanatga/naser_dsb_capston.git
   git push fork streamlit-app
   ```
 - [ ] **Sign in to Streamlit Community Cloud.** Go to [share.streamlit.io](https://share.streamlit.io) and sign in with the GitHub account that owns the fork. This step happens in the browser.
@@ -16,7 +16,7 @@ Checklist for publishing the Streamlit app on Streamlit Community Cloud. Steps 1
 
 | Setting | Value |
 | --- | --- |
-| Repository | `<your-username>/dsb_capston` |
+| Repository | `juanatga/naser_dsb_capston` |
 | Branch | `streamlit-app` (or `main` if merged) |
 | Main file path | `app.py` |
 | Python version (Advanced settings) | 3.13 |
